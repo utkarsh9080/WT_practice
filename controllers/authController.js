@@ -44,15 +44,21 @@ const register = async (req,res)=>{
 };
 
 const login = async(req,res)=>{
-        const {
-            email,
-            password
-        } = req.body;
+    try{
+        const {email,password} = req.body;
+        const user = await User.findOne({ email });
+        if(!user){
+          return res.status(401).json({message:"invalid email or password"})
+        }
+        const now = new Date();
+        if(user.lockUntil && user.lockUntil>now){
+          return res.status(423).json({message:"Account temporarily locked "});
+        }
 
-        const user = await User.findOne({
-            email
-        });
-
+        if(user.lockedUntil && user.lockUntil<=now){
+          user.failedLoginAttempts =0;
+          user.lockUntil=null;
+        }
         const passwordMatched = await bcrypt.compare(password, user.password);
 
         // req.session.user = {
@@ -60,8 +66,22 @@ const login = async(req,res)=>{
         // email: user.email,    
         // role: user.role
         // };
-            const token = generateToken(user);
-            res.cookie("accessToken",token,{httpOnly: true});
+        if(!passwordMatched){
+          user.failedLoginAttempts +=1;
+          if(user.failedLoginAttempts>=3){
+            user.lockUntil = new Date(Date.now() + 10*60*1000);
+          }
+          await user.save();
+          if(user.lockUntil){
+            return res.status(423).json({message:"Account temporarily blocked"});
+          }
+          return res.status(401).json({message:"invalid email or password"});
+        }
+        user.failedLoginAttempts =0;
+        user.lockUntil = null;
+        await user.save();
+        const token = generateToken(user);
+        res.cookie("accessToken",token,{httpOnly: true});
 
         res.status(200).json({
             message:"Login Successful",
@@ -72,6 +92,9 @@ const login = async(req,res)=>{
                 role:user.role
             }
         });
+    }catch(error){
+      return res.status(500).json({message:"Login failed"});
+    }
     }
 
     const getCurrentUser =

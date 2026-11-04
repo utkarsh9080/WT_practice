@@ -5,12 +5,18 @@ const userSchema = new mongoose.Schema({
     password:String,
     role:{
         type:String,
-        enum:[
-            "admin",
-            "user"
-        ],
+        enum:["admin","user"],
         default:"user"
+    },
+    failedLoginAttempts:{
+        type:Number,
+        default:0
+    },
+    lockUntil:{
+        type:Date,
+        default:null
     }
+
 })
 
 module.exports = mongoose.model("User",userSchema);
