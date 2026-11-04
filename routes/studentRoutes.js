@@ -16,7 +16,7 @@ const {
 router.post("/student",requireJwtAuth, allowRoles("admin","user"),createStudent);
 router.get("/student",requireJwtAuth,allowRoles("user"),readStudent);
 router.get("/student/:id",requireJwtAuth,allowRoles("admin"),getStudentById);
-router.put("/student/:id",requireJwtAuth,allowRoles("admin"),updateStudent);
+router.put("/student/:id",requireJwtAuth,allowRoles("admin","user"),updateStudent);
 router.delete("/student/:id",requireJwtAuth,allowRoles("admin"),deleteStudent);
 
 module.exports = router;
