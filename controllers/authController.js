@@ -44,17 +44,18 @@ const register = async (req,res)=>{
 };
 
 const login = async(req,res)=>{
-        const {
-            email,
-            password
-        } = req.body;
-
-        const user = await User.findOne({
-            email
-        });
-
+        const {email,password} = req.body;
+        const user = await User.findOne({ email });
+        if(!user){
+          return res.status(401).json({message:"invalid email or password"});
+        }
+        if(!user.activeUser){
+          return res.status(403).json({message:"user is inactive"});
+        }
         const passwordMatched = await bcrypt.compare(password, user.password);
-
+        if(!passwordMatched){
+          return res.status(401).json({message:"invalid email or password"});
+        }
         // req.session.user = {
         // id: user._id,
         // email: user.email,    

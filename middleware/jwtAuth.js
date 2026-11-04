@@ -28,7 +28,11 @@ const requireJwtAuth = async (req, res, next) => {
                 message: "User not found"
             });
         }
-
+        if (!user.activeUser) {
+            return res.status(401).json({
+                message: "User is inactive"
+            });
+        }
         // 4. Put user into request
         req.user = user;
 

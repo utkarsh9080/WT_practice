@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema({
             "user"
         ],
         default:"user"
+    },
+    activeUser:{
+        type:Boolean,
+        default:true
     }
 })
 
