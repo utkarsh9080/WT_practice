@@ -5,11 +5,16 @@ const userSchema = new mongoose.Schema({
     password:String,
     role:{
         type:String,
-        enum:[
-            "admin",
-            "user"
-        ],
+        enum:["admin","user"],
         default:"user"
+    },
+    refreshToken:{
+        type:String,
+        default:null
+    },
+    refreshTokenIp:{
+        type:String,
+        default:null
     }
 })
 
