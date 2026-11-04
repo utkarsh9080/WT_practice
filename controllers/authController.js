@@ -62,7 +62,7 @@ const login = async(req,res)=>{
         // role: user.role
         // };
             const token = generateToken(user);
-            res.cookie("accessToken",token,{httpOnly: true});
+            res.cookie("accessToken",token,getAuthCookieOptions());
 
         res.status(200).json({
             message:"Login Successful",
@@ -101,19 +101,32 @@ const login = async(req,res)=>{
   };
 
     const logout = async (req,res) => {
-    req.session.destroy(
-    error => {
-      if (error) {
-        return res.status(500).json({message:"Logout failed"});
-      }
+    // req.session.destroy(
+    // error => {
+    //   if (error) {
+    //     return res.status(500).json({message:"Logout failed"});
+    //   }
     //   res.clearCookie("connect.sid");
-     res.clearCookie("accessToken",{httpOnly: true} );
+     res.clearCookie("accessToken",getAuthCookieClearOptions() );
 
       res.status(200).json({message:"Logout successful"});
 
     }
-  );
+//   );
 
-};
+// };
+
+const getAuthCookieOptions =()  =>({
+  httpOnly:true,
+  secure:process.env.NODE_ENV==="production",
+  sameSite:"lax",
+  maxAge:15*60*1000
+})
+
+const getAuthCookieClearOptions =()  =>({
+  httpOnly:true,
+  secure:process.env.NODE_ENV==="production",
+  sameSite:"lax"
+})
 
 module.exports = {register,login,logout,getCurrentUser};
